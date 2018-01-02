@@ -1,29 +1,20 @@
-import csv
-import datetime
+from string import capwords
 
-from decimal import Decimal
-
-import re
-
-CARD_NAME = 'Citi DoubleCash'
 AMOUNT_THRESHOLD = 5
 
 
 class Category(object):
-    GROCERY = 'Grocery'
-    TAXI = 'Transportation/Taxi'
-    FAST_FOOD = 'Dining/Fast Food'
-    TOILETRIES = 'Appearance/Toiletries'
-    GYM = 'Sports/Gym'
     DRINKS = 'Dining/Drinks'
+    ENTERTAINMENT = 'Entertainment'
+    FAST_FOOD = 'Dining/Fast Food'
     FINANCIAL_MANAGEMENT = 'Financial Management'
+    GROCERY = 'Grocery'
+    GYM = 'Sports/Gym'
+    TAXI = 'Transportation/Taxi'
+    TOILETRIES = 'Appearance/Toiletries'
 
-
-def _sanitize_name(name):
-    parts = name.split()
-    if len(parts) > 1 and re.search('[0-9]{3}', parts[-1]):
-        return ' '.join(parts[:-1])
-    return name
+    class Housing(object):
+        CABLE = 'Housing/Cable'
 
 
 class Merchant(object):
@@ -36,12 +27,15 @@ class Merchants(object):
     BLINK = Merchant("Blink Fitness", Category.GYM)
     CLASSPASS = Merchant("Classpass", Category.GYM)
     COINBASE = Merchant("Coinbase", Category.FINANCIAL_MANAGEMENT)
+    VERIZON = Merchant("Verizon Wireless", Category.Housing.CABLE)
 
 
 RECURRING_MERCHANTS = {
+    # Also, coned and Spectrum
     Merchants.BLINK,
     Merchants.CLASSPASS,
     Merchants.COINBASE,
+    Merchants.VERIZON,
 }
 
 
@@ -59,52 +53,17 @@ NAME_CONVERSIONS = {
     "coinbase": Merchants.COINBASE,
     "mortonwilliams": Merchant("Morton Williams", Category.GROCERY),
     "nyctaxi": Merchant("NYC Taxi", Category.TAXI),
+    "you should be": Merchant("You Should Be Dancing", Category.ENTERTAINMENT),
+    "verizon": Merchants.VERIZON,
 }
 
 
-def _lower(in_str):
-    return in_str.group(0).lower()
-
-
 class Transaction(object):
-    class Description(object):
-        def __init__(self, desc_string: str):
-            self.name = desc_string[:23].strip()
-            self.city = desc_string[23:37].strip()
-            self.state = desc_string[37:41].strip()
-            self.extra = desc_string[41:].strip() or None
-
-        @property
-        def merchant(self) -> Merchant:
-            lower_name = self.name.lower()
-            for key, val in NAME_CONVERSIONS.items():
-                if key in lower_name:
-                    return val
-            name = self.name.title().replace("'S", "'s")
-            name = re.sub(r'\d\w+', _lower, name)
-            name = re.sub(r'(.{1,8}\*)', '', name, flags=re.IGNORECASE)
-            name = name.strip()
-            return Merchant(_sanitize_name(name), '')
-
-    @staticmethod
-    def _convert_amount(amount):
-        return Decimal(amount.replace(',', '')) if amount else None
-
-    @staticmethod
-    def _convert_date(date_str):
-        return datetime.datetime.strptime(date_str, '%m/%d/%Y').date()
-
-    @property
-    def is_charge(self):
-        return self.debit is not None
+    CARD_NAME = NotImplemented
 
     @property
     def formatted_date(self):
         return self.date.strftime('%m/%d/%Y')
-
-    @property
-    def amount(self):
-        return self.debit or self.credit
 
     @property
     def meets_threshold(self):
@@ -112,25 +71,44 @@ class Transaction(object):
 
     @property
     def recurring_ignored(self):
-        return self.description.merchant in RECURRING_MERCHANTS
+        return self.merchant in RECURRING_MERCHANTS
 
     @property
     def should_include(self):
-        return self.meets_threshold and not self.recurring_ignored
+        return self.meets_threshold and not self.recurring_ignored and self.is_charge
 
-    def __init__(self, status, date, description, debit, credit):
-        self.status = status
-        self.date = self._convert_date(date)
-        self.description = self.Description(desc_string=description)
-        self.debit = self._convert_amount(debit)
-        self.credit = self._convert_amount(credit)
+    @staticmethod
+    def _parse_merchant(raw, parsed):
+        lower_name = raw.lower()
+        for key, val in NAME_CONVERSIONS.items():
+            if key in lower_name:
+                return val
+        return Merchant(parsed, '')
+
+    def __init__(self, date, merchant, amount, is_charge):
+        self.date = date
+        self.merchant = merchant
+        self.amount = amount
+        self.is_charge = is_charge
 
     @property
     def formatted(self) -> str:
         return ','.join([
             self.formatted_date,
-            self.description.merchant.name,
-            self.description.merchant.category,
+            self.merchant.name,
+            self.merchant.category,
             str(self.amount),
-            CARD_NAME,
+            self.CARD_NAME,
         ])
+
+    def __str__(self):
+        return self.formatted
+
+
+class TransactionList(list):
+    def __str__(self):
+        out = ''
+        for transaction in self:
+            if transaction.should_include:
+                out += transaction.formatted + '\n'
+        return out
