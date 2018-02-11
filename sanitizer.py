@@ -28,6 +28,7 @@ class Merchants(object):
     CLASSPASS = Merchant("Classpass", Category.GYM)
     COINBASE = Merchant("Coinbase", Category.FINANCIAL_MANAGEMENT)
     VERIZON = Merchant("Verizon Wireless", Category.Housing.CABLE)
+    NETFLIX = Merchant("Netflix", Category.Housing.CABLE)
 
 
 RECURRING_MERCHANTS = {
@@ -36,6 +37,7 @@ RECURRING_MERCHANTS = {
     Merchants.CLASSPASS,
     Merchants.COINBASE,
     Merchants.VERIZON,
+    Merchants.NETFLIX,
 }
 
 
@@ -55,6 +57,8 @@ NAME_CONVERSIONS = {
     "nyctaxi": Merchant("NYC Taxi", Category.TAXI),
     "you should be": Merchant("You Should Be Dancing", Category.ENTERTAINMENT),
     "verizon": Merchants.VERIZON,
+    "vzwrlss": Merchants.VERIZON,
+    "netflix": Merchants.NETFLIX,
 }
 
 

@@ -13,9 +13,11 @@ class UberTransaction(Transaction):
 
     @staticmethod
     def _parsed_description(description):
-        if description.startswith('SQ *'):
+        if description.startswith('SQ *') or description.startswith('TST* '):
             description = description[4:]
         description = capwords(description)
+        description = description.strip()
+        description = description.replace(',', '')
         description = description.replace('`', "'")
         return description
 
@@ -38,7 +40,7 @@ def process(infile: str) -> list:
             lowered = {key.lower(): val for key, val in row.items()}
             lowered['date'] = lowered['transaction date']
             del lowered['transaction date']
-            transaction_list.append(UberTransaction(**lowered))
+            transaction_list.insert(0, UberTransaction(**lowered))
     return transaction_list
 
 
