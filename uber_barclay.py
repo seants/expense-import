@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 from decimal import Decimal
 
 import datetime
@@ -15,6 +16,7 @@ class UberTransaction(Transaction):
     def _parsed_description(description):
         if description.startswith('SQ *') or description.startswith('TST* '):
             description = description[4:]
+        description = re.sub(r'(\d{4,15})$', '', description)
         description = capwords(description)
         description = description.strip()
         description = description.replace(',', '')

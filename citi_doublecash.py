@@ -15,8 +15,9 @@ def _lower(in_str):
 
 
 def _sanitize_name(name):
+    # For street numbers
     name = re.sub(r'\d\w+', _lower, name)
-    name = re.sub(r'(.{1,8}\*)', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'(#? ?\d{1,8}\*?)', '', name, flags=re.IGNORECASE)
     name = name.strip()
     name = capwords(name)
     parts = name.split()
