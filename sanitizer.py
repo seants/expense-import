@@ -29,6 +29,7 @@ class Merchants(object):
     COINBASE = Merchant("Coinbase", Category.FINANCIAL_MANAGEMENT)
     VERIZON = Merchant("Verizon Wireless", Category.Housing.CABLE)
     NETFLIX = Merchant("Netflix", Category.Housing.CABLE)
+    TWC = Merchant('Time Warner Cable', Category.Housing.CABLE)
 
 
 RECURRING_MERCHANTS = {
@@ -38,6 +39,7 @@ RECURRING_MERCHANTS = {
     Merchants.COINBASE,
     Merchants.VERIZON,
     Merchants.NETFLIX,
+    Merchants.TWC,
 }
 
 
@@ -59,6 +61,8 @@ NAME_CONVERSIONS = {
     "verizon": Merchants.VERIZON,
     "vzwrlss": Merchants.VERIZON,
     "netflix": Merchants.NETFLIX,
+    "twc*time warner nyc": Merchants.TWC,
+    "mighty bowl": Merchant("Mighty Bowl", Category.FAST_FOOD),
 }
 
 

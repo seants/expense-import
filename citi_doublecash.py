@@ -27,7 +27,7 @@ def _sanitize_name(name):
 
 
 def _convert_amount(amount):
-    return Decimal(amount.replace(',', '')) if amount else None
+    return Decimal(amount.replace(',', '')) if amount else 0
 
 
 class CitiDescription(object):
