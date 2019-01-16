@@ -4,6 +4,7 @@ AMOUNT_THRESHOLD = 5
 
 
 class Category(object):
+    HAIRCUT = 'Appearance/Haircut'
     DRINKS = 'Dining/Drinks'
     ENTERTAINMENT = 'Entertainment'
     FAST_FOOD = 'Dining/Fast Food'
@@ -45,6 +46,8 @@ HALF_CHARGE = {
 
 NAME_CONVERSIONS = {
     "trader joe's": Merchant("Trader Joe's", Category.GROCERY),
+    "whos next gents salon": Merchant("Who's Next Salon", Category.HAIRCUT),
+    "zoom site no. 6523": Merchant('Zoom Majan', Category.GROCERY),
     'uber   trip': Merchant('Uber', Category.TAXI),
     'uber   eats': Merchant('UberEats', Category.FAST_FOOD),
     'lyft': Merchant('Lyft', Category.TAXI),

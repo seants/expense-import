@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 
 import datetime
@@ -67,8 +68,19 @@ def process(infile: str) -> list:
     return transaction_list
 
 
+def find_file():
+    candidates = set()
+    for file in os.listdir("/Users/seanscott/Downloads/"):
+        if file.startswith("From ") and file.endswith(".CSV"):
+            candidates.add(os.path.join("/Users/seanscott/Downloads/", file))
+    if len(candidates) != 1:
+        raise ValueError
+    else:
+        return next(iter(candidates))
+
+
 def main():
-    transactions = process('/Users/seanscott/Downloads/MC_954_CURRENT_VIEW.CSV')
+    transactions = process(find_file())
     print(transactions)
 
 
