@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 
 import datetime
@@ -14,7 +15,7 @@ def _lower(in_str):
     return in_str.group(0).lower()
 
 
-def _sanitize_name(name):
+def _sanitize_name(name: str) -> str:
     # For street numbers
     name = re.sub(r'\d\w+', _lower, name)
     name = re.sub(r'(#? ?\d{1,8}\*?)', '', name, flags=re.IGNORECASE)
@@ -57,7 +58,7 @@ def process(infile: str) -> list:
     return transaction_list
 
 
-def main():
+def main() -> None:
     transactions = process('/Users/seanscott/Downloads/Discover-2018-YearToDateSummary.csv')
     print(transactions)
 

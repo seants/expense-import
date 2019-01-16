@@ -33,19 +33,20 @@ class Merchants(object):
 
 
 RECURRING_MERCHANTS = {
-    # Also, coned and Spectrum
-    Merchants.BLINK,
-    Merchants.CLASSPASS,
-    Merchants.COINBASE,
     Merchants.VERIZON,
     Merchants.NETFLIX,
+}
+
+HALF_CHARGE = {
+    # Also ConEd but goes to debit acct
     Merchants.TWC,
 }
 
 
 NAME_CONVERSIONS = {
     "trader joe's": Merchant("Trader Joe's", Category.GROCERY),
-    'uber': Merchant('Uber', Category.TAXI),
+    'uber   trip': Merchant('Uber', Category.TAXI),
+    'uber   eats': Merchant('UberEats', Category.FAST_FOOD),
     'lyft': Merchant('Lyft', Category.TAXI),
     'target': Merchant('Target', Category.GROCERY),
     "mcdonald's": Merchant("McDonald's", Category.FAST_FOOD),
@@ -82,6 +83,10 @@ class Transaction(object):
         return self.merchant in RECURRING_MERCHANTS
 
     @property
+    def half_charge(self):
+        return self.merchant in HALF_CHARGE
+
+    @property
     def should_include(self):
         return self.meets_threshold and not self.recurring_ignored and self.is_charge
 
@@ -92,6 +97,10 @@ class Transaction(object):
             if key in lower_name:
                 return val
         return Merchant(parsed, '')
+
+    @property
+    def final_amount(self):
+        return round(self.amount / 2 if self.half_charge else self.amount, 2)
 
     def __init__(self, date, merchant, amount, is_charge):
         self.date = date
@@ -105,7 +114,7 @@ class Transaction(object):
             self.formatted_date,
             self.merchant.name,
             self.merchant.category,
-            str(self.amount),
+            str(self.final_amount),
             self.CARD_NAME,
         ])
 
