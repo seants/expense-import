@@ -1,55 +1,54 @@
 import csv
 import os
-import re
 from decimal import Decimal
 
 import datetime
 from string import capwords
 
-from sanitizer import Transaction, NAME_CONVERSIONS, TransactionList
+from sanitizer import Transaction, TransactionList
 
 
-class UberTransaction(Transaction):
-    CARD_NAME = 'Uber Barclaycard'
+class QuicksilverTransaction(Transaction):
+    CARD_NAME = 'Capital One Quicksilver'
 
     @staticmethod
     def _parsed_description(description):
-        if description.startswith('SQ *') or description.startswith('TST* '):
-            description = description[4:]
-        description = re.sub(r'(\d{4,15})$', '', description)
         description = capwords(description)
         description = description.strip()
         description = description.replace(',', '')
-        description = description.replace('`', "'")
         return description
 
-    def __init__(self, date, description, category, amount):
-        super(UberTransaction, self).__init__(
+    def __init__(self, card, stage, date, description, debit, credit):
+        if card != '7299' or stage != 'POSTED' or (debit and credit):
+            raise ValueError
+        super(QuicksilverTransaction, self).__init__(
             date=datetime.datetime.strptime(date, '%m/%d/%Y').date(),
             merchant=self._parse_merchant(description, self._parsed_description(description)),
-            amount=-1 * Decimal(amount),
-            is_charge=category == 'DEBIT',
+            amount=Decimal(debit or credit),
+            is_charge=bool(debit),
         )
 
 
 def process(infile: str) -> list:
     transaction_list = TransactionList()
     with open(infile) as f:
-        for _ in range(4):
-            f.readline()
         reader = csv.DictReader(f)
         for row in reader:
-            lowered = {key.lower(): val for key, val in row.items()}
-            lowered['date'] = lowered['transaction date']
-            del lowered['transaction date']
-            transaction_list.insert(0, UberTransaction(**lowered))
+            transaction_list.insert(0, QuicksilverTransaction(
+                card=row[' Card No.'],
+                stage=row['Stage'],
+                date=row[' Transaction Date'],
+                description=row[' Description'],
+                debit=row[' Debit'],
+                credit=row[' Credit'],
+            ))
     return transaction_list
 
 
 def find_file():
     candidates = set()
     for file in os.listdir("/Users/seanscott/Downloads/"):
-        if file.startswith("CreditCard_") and file.endswith(".csv"):
+        if file.endswith("_transaction_download.csv"):
             candidates.add(os.path.join("/Users/seanscott/Downloads/", file))
     if len(candidates) != 1:
         raise ValueError
