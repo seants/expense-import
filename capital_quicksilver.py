@@ -6,10 +6,11 @@ import datetime
 from string import capwords
 
 from sanitizer import Transaction, TransactionList
+from util import find_file
 
 
 class QuicksilverTransaction(Transaction):
-    CARD_NAME = 'Capital One Quicksilver'
+    CARD_NAME = 'CapitalOne Quicksilver'
 
     @staticmethod
     def _parsed_description(description):
@@ -45,19 +46,8 @@ def process(infile: str) -> list:
     return transaction_list
 
 
-def find_file():
-    candidates = set()
-    for file in os.listdir("/Users/seanscott/Downloads/"):
-        if file.endswith("_transaction_download.csv"):
-            candidates.add(os.path.join("/Users/seanscott/Downloads/", file))
-    if len(candidates) != 1:
-        raise ValueError
-    else:
-        return next(iter(candidates))
-
-
 def main():
-    transactions = process(find_file())
+    transactions = process(find_file("/Users/seanscott/Downloads/", "", "_transaction_download.csv"))
     print(transactions)
 
 

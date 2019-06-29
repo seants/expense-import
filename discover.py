@@ -7,6 +7,7 @@ from decimal import Decimal
 from string import capwords
 
 from sanitizer import Transaction, TransactionList
+from util import find_file
 
 CARD_NAME = 'Discover Credit Card'
 
@@ -59,7 +60,7 @@ def process(infile: str) -> list:
 
 
 def main() -> None:
-    transactions = process('/Users/seanscott/Downloads/Discover-2018-YearToDateSummary.csv')
+    transactions = process(find_file("/Users/seanscott/Downloads/", "DFS-Search-", ".csv"))
     print(transactions)
 
 

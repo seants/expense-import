@@ -24,13 +24,14 @@ class AmazonTransaction(Transaction):
         return description
 
     def __init__(self, date, description, type, amount):
-        if type not in ('Sale', 'Payment'):
+        if type not in ('Sale', 'Payment', 'Return'):
             raise ValueError
         super(AmazonTransaction, self).__init__(
             date=datetime.datetime.strptime(date, '%m/%d/%Y').date(),
             merchant=self._parse_merchant(description, self._parsed_description(description)),
             amount=-1 * Decimal(amount),
             is_charge=type == 'Sale',
+            is_return=type == 'Return',
         )
 
 
@@ -40,9 +41,10 @@ def process(infile: str) -> list:
         reader = csv.DictReader(f)
         for row in reader:
             lowered = {key.lower(): val for key, val in row.items()}
-            lowered['date'] = lowered['trans date']
-            del lowered['trans date']
+            lowered['date'] = lowered['transaction date']
+            del lowered['transaction date']
             del lowered['post date']
+            del lowered['category']
             transaction_list.insert(0, AmazonTransaction(**lowered))
     return transaction_list
 
