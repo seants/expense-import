@@ -19,11 +19,11 @@ class QuicksilverTransaction(Transaction):
         description = description.replace(',', '')
         return description
 
-    def __init__(self, card, stage, date, description, debit, credit):
-        if card != '7299' or stage != 'POSTED' or (debit and credit):
+    def __init__(self, card, date, description, debit, credit):
+        if card != '7299' or (debit and credit):
             raise ValueError
         super(QuicksilverTransaction, self).__init__(
-            date=datetime.datetime.strptime(date, '%m/%d/%Y').date(),
+            date=datetime.datetime.strptime(date, '%Y-%m-%d').date(),
             merchant=self._parse_merchant(description, self._parsed_description(description)),
             amount=Decimal(debit or credit),
             is_charge=bool(debit),
@@ -36,12 +36,11 @@ def process(infile: str) -> list:
         reader = csv.DictReader(f)
         for row in reader:
             transaction_list.insert(0, QuicksilverTransaction(
-                card=row[' Card No.'],
-                stage=row['Stage'],
-                date=row[' Transaction Date'],
-                description=row[' Description'],
-                debit=row[' Debit'],
-                credit=row[' Credit'],
+                card=row['Card No.'],
+                date=row['Transaction Date'],
+                description=row['Description'],
+                debit=row['Debit'],
+                credit=row['Credit'],
             ))
     return transaction_list
 
