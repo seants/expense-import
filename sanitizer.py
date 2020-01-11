@@ -1,4 +1,5 @@
-from string import capwords
+from collections import defaultdict
+from operator import itemgetter
 
 AMOUNT_THRESHOLD = 5
 
@@ -28,6 +29,13 @@ class Merchant(object):
     def __init__(self, name: str, category: str):
         self.name = name
         self.category = category
+
+    def __hash__(self):
+        return self.name.__hash__()
+
+    # TODO annotate with own class by from __future__ import annotations and python3.7
+    def __eq__(self, other):
+        return self.name == other.name and self.category == other.category
 
 
 class Merchants(object):
@@ -101,7 +109,13 @@ NAME_CONVERSIONS = {
 
 
 class Transaction(object):
+    # Not sure if this is best practice design, but child classes can either override this class variable or the
+    # property-method below.
     CARD_NAME = NotImplemented
+
+    @property
+    def card_name(self):
+        return self.CARD_NAME
 
     @property
     def formatted_date(self):
@@ -149,17 +163,50 @@ class Transaction(object):
             self.merchant.name,
             self.merchant.category,
             str(self.final_amount),
-            self.CARD_NAME,
+            self.card_name,
         ])
 
     def __str__(self):
         return self.formatted
 
 
+class GenericTransaction(Transaction):
+    def __init__(self, date, merchant, amount, is_charge, is_return, card_name):
+        super(GenericTransaction, self).__init__(
+            date=date,
+            merchant=merchant,
+            amount=amount,
+            is_charge=is_charge,
+            is_return=is_return,
+        )
+        self._card_name = card_name
+
+    @property
+    def card_name(self):
+        return self._card_name
+
+
 class TransactionList(list):
+    def glob_small_amounts(self) -> None:
+        below_threshold = [t for t in self if not t.meets_threshold and t.is_charge]
+
+        # TODO use pydash group by
+        merchant_transactions = defaultdict(list)
+        for transaction in below_threshold:
+            merchant_transactions[transaction.merchant].append(transaction)
+
+        for merchant, transactions in merchant_transactions.items():
+            if len(transactions) > 1:
+                self.append(GenericTransaction(
+                    date=transactions[0].date,
+                    merchant=Merchant(merchant.name + ' (Aggregated)', merchant.category),
+                    amount=sum(transaction.amount for transaction in transactions),
+                    is_charge=True,
+                    is_return=False,
+                    card_name=transactions[0].card_name,
+                ))
+                for transaction in transactions:
+                    self.remove(transaction)
+
     def __str__(self):
-        out = ''
-        for transaction in self:
-            if transaction.should_include:
-                out += transaction.formatted + '\n'
-        return out
+        return '\n'.join(t.formatted for t in self if t.should_include)

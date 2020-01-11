@@ -30,7 +30,7 @@ class QuicksilverTransaction(Transaction):
         )
 
 
-def process(infile: str) -> list:
+def process(infile: str) -> TransactionList:
     transaction_list = TransactionList()
     with open(infile) as f:
         reader = csv.DictReader(f)
@@ -46,7 +46,8 @@ def process(infile: str) -> list:
 
 
 def main():
-    transactions = process(find_file("/Users/seanscott/Downloads/", "", "_transaction_download.csv"))
+    transactions: TransactionList = process(find_file("/Users/seanscott/Downloads/", "", "_transaction_download.csv"))
+    transactions.glob_small_amounts()
     print(transactions)
 
 
