@@ -1,0 +1,23 @@
+## Overview
+
+This project contains scripts to import CSV files provided by various credit cards/financial institutions into a standardized CSV format with the following headers and example output:
+
+Date|Vendor|Category|Amount|Payment Method
+---|---|---|---|---
+Friday, January 03, 2020|In N Out Burger|Dining/Fast Food|$5.23|Uber Barclaycard
+Monday, January 06, 2020|Safeway|Grocery|$32.46|Citi DoubleCash
+
+## Cards Supported
+* Barclaycard Uber Rewards
+* Capital One Quicksilver
+* Chase Amazon Rewards
+* Citi DoubleCash
+* Discover It
+
+Note that other cards from the same banks likely follow a similar standard output format. When asked by the financial institution to choose a format, always use the CSV or Excel option.
+
+## Code Style
+
+This is largely simple, script-based code. There is a good amount of repeated code and documented as well as undocumented TODOs.
+
+It is written against python3.6
