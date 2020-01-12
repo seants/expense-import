@@ -58,7 +58,7 @@ class CitiTransaction(Transaction):
         )
 
 
-def process(infile: str) -> list:
+def process(infile: str) -> TransactionList:
     transaction_list = TransactionList()
     with open(infile) as f:
         reader = csv.DictReader(f)
@@ -68,7 +68,7 @@ def process(infile: str) -> list:
     return transaction_list
 
 
-def find_file():
+def find_file() -> str:
     candidates = set()
     for file in os.listdir("/Users/seanscott/Downloads/"):
         if file.startswith("From ") and file.endswith(".CSV"):
@@ -81,6 +81,8 @@ def find_file():
 
 def main():
     transactions = process(find_file())
+    transactions.date_sort()
+    transactions.glob_small_amounts()
     print(transactions)
 
 
