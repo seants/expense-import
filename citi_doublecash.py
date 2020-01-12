@@ -6,7 +6,7 @@ import datetime
 from decimal import Decimal
 from string import capwords
 
-from sanitizer import Transaction, Merchant, NAME_CONVERSIONS, TransactionList
+from sanitizer import Transaction, TransactionList
 
 CARD_NAME = 'Citi DoubleCash'
 
