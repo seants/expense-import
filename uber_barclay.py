@@ -62,6 +62,7 @@ def find_file() -> str:
 
 def main():
     transactions: TransactionList = process(find_file())
+    transactions.date_sort()
     transactions.glob_small_amounts()
     print(transactions)
 
