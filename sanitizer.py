@@ -200,6 +200,20 @@ class GenericTransaction(Transaction):
 
 
 class TransactionList(list):
+    """
+    Convenience wrapper class for holding a list of Transactions.
+
+    Typical usage::
+
+        transactions = process('/path/to/file.csv')
+        transactions.date_sort()
+        transactions.glob_small_amounts()
+        print(transactions)
+
+    Note that with this usage, aggregated transactions appear last, sorted separately from the true transactions.
+    To override this behavior, add another :meth:`date_sort` before the :meth:`print`.
+    """
+
     def date_sort(self) -> None:
         self.sort(key=attrgetter('date'))
 
