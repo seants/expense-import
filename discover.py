@@ -1,5 +1,4 @@
 import csv
-import os
 import re
 
 import datetime
@@ -46,7 +45,7 @@ class DiscoverTransaction(Transaction):
         )
 
 
-def process(infile: str) -> list:
+def process(infile: str) -> TransactionList:
     transaction_list = TransactionList()
     with open(infile) as f:
         reader = csv.DictReader(f)
@@ -61,6 +60,8 @@ def process(infile: str) -> list:
 
 def main() -> None:
     transactions = process(find_file("/Users/seanscott/Downloads/", "DFS-Search-", ".csv"))
+    transactions.date_sort()
+    transactions.glob_small_amounts()
     print(transactions)
 
 
