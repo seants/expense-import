@@ -1,5 +1,5 @@
 from collections import defaultdict
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 
 AMOUNT_THRESHOLD = 5
 
@@ -200,7 +200,11 @@ class GenericTransaction(Transaction):
 
 
 class TransactionList(list):
+    def date_sort(self) -> None:
+        self.sort(key=attrgetter('date'))
+
     def glob_small_amounts(self) -> None:
+        """Depends on the list being date-sorted"""
         below_threshold = [t for t in self if not t.meets_threshold and t.is_charge]
 
         # TODO use pydash group by
