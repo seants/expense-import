@@ -18,10 +18,8 @@ class UberTransaction(Transaction):
             description = description[4:]
         description = re.sub(r'(\d{4,15})$', '', description)
         description = capwords(description)
-        description = description.strip()
-        description = description.replace(',', '')
         description = description.replace('`', "'")
-        return description
+        return Transaction._sanitize_description(description)
 
     def __init__(self, date, description, category, amount):
         super(UberTransaction, self).__init__(
@@ -29,10 +27,15 @@ class UberTransaction(Transaction):
             merchant=self._parse_merchant(description, self._parsed_description(description)),
             amount=-1 * Decimal(amount),
             is_charge=category == 'DEBIT',
+            is_return=(
+                category == 'CREDIT'
+                and not description.startswith('CASH BACK')
+                and not description.startswith('Payment Received')
+            ),
         )
 
 
-def process(infile: str) -> list:
+def process(infile: str) -> TransactionList:
     transaction_list = TransactionList()
     with open(infile) as f:
         for _ in range(4):
@@ -46,7 +49,7 @@ def process(infile: str) -> list:
     return transaction_list
 
 
-def find_file():
+def find_file() -> str:
     candidates = set()
     for file in os.listdir("/Users/seanscott/Downloads/"):
         if file.startswith("CreditCard_") and file.endswith(".csv"):
@@ -58,7 +61,8 @@ def find_file():
 
 
 def main():
-    transactions = process(find_file())
+    transactions: TransactionList = process(find_file())
+    transactions.glob_small_amounts()
     print(transactions)
 
 

@@ -70,14 +70,16 @@ HALF_CHARGE = {
 }
 
 
+# TODO these should live on the specific cards since one card is pretty much used per merchant.
 NAME_CONVERSIONS = {
     'mcdonalds': Merchants.MC_DONALDS,
     'zomato order': Merchants.ZOMATO,
     "trader joe's": Merchant("Trader Joe's", Category.GROCERY),
     "whos next gents salon": Merchant("Who's Next Salon", Category.HAIRCUT),
     "zoom site no. 6523": Merchant('Zoom Majan', Category.GROCERY),
-    'uber   trip': Merchant('Uber', Category.Transportation.TAXI),
-    'uber   eats': Merchant('UberEats', Category.FAST_FOOD),
+    'uber trip': Merchant('Uber', Category.Transportation.TAXI),
+    'grab': Merchant('Grab', Category.Transportation.TAXI),
+    'uber eats': Merchant('UberEats', Category.FAST_FOOD),
     'lyft': Merchant('Lyft', Category.Transportation.TAXI),
     'target': Merchant('Target', Category.GROCERY),
     "mcdonald's": Merchant("McDonald's", Category.FAST_FOOD),
@@ -138,12 +140,23 @@ class Transaction(object):
         return self.meets_threshold and not self.recurring_ignored and (self.is_charge or self.is_return)
 
     @staticmethod
-    def _parse_merchant(raw, parsed):
+    def _parse_merchant(raw: str, parsed: str):
         lower_name = raw.lower()
+        # Remove repeated whitespace
+        lower_name = " ".join(lower_name.split())
+        # TODO use the parsed version instead
         for key, val in NAME_CONVERSIONS.items():
             if key in lower_name:
                 return val
         return Merchant(parsed, '')
+
+    @staticmethod
+    def _sanitize_description(description: str):
+        description = description.strip()
+        description = description.replace(',', '')
+        # Remove repeated whitespace
+        description = " ".join(description.split())
+        return description
 
     @property
     def final_amount(self):
