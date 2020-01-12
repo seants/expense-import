@@ -47,6 +47,7 @@ def process(infile: str) -> TransactionList:
 
 def main():
     transactions: TransactionList = process(find_file("/Users/seanscott/Downloads/", "", "_transaction_download.csv"))
+    transactions.date_sort()
     transactions.glob_small_amounts()
     print(transactions)
 
