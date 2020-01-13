@@ -20,4 +20,4 @@ Note that other cards from the same banks likely follow a similar standard outpu
 
 This is largely simple, script-based code. There is a good amount of repeated code and documented as well as undocumented TODOs.
 
-It is written against python3.6
+It is written against python3.6. There is no requirements file as there are no imports needed.
